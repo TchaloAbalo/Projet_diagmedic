@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Aide au Pré-Diagnostic Médical</h2>
+            </div>
+            <div class="card-body">
+                <p class="alert alert-info">
+                    <strong>Important:</strong> Cette application est conçue uniquement pour fournir des indications préliminaires et ne remplace en aucun cas une consultation médicale professionnelle.
+                </p>
+                
+                <form method="POST" action="{{ url_for('main.index') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.symptoms.id }}" class="form-label">{{ form.symptoms.label }}</label>
+                        <select class="form-select" id="{{ form.symptoms.id }}" name="{{ form.symptoms.name }}" multiple size="10" required>
+                            {% for option in form.symptoms %}
+                                {{ option }}
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Maintenez la touche Ctrl (ou Cmd sur Mac) pour sélectionner plusieurs symptômes.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="useLocation">
+                            <label class="form-check-label" for="useLocation">
+                                Utiliser ma position actuelle pour trouver les centres de santé
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="locationFields" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.latitude.id }}" class="form-label">{{ form.latitude.label }}</label>
+                                    <input type="text" class="form-control" id="{{ form.latitude.id }}" name="{{ form.latitude.name }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.longitude.id }}" class="form-label">{{ form.longitude.label }}</label>
+                                    <input type="text" class="form-control" id="{{ form.longitude.id }}" name="{{ form.longitude.name }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const useLocationCheckbox = document.getElementById('useLocation');
+    const locationFields = document.getElementById('locationFields');
+    const latitudeInput = document.getElementById('{{ form.latitude.id }}');
+    const longitudeInput = document.getElementById('{{ form.longitude.id }}');
+    
+    useLocationCheckbox.addEventListener('change', function() {
+        locationFields.style.display = this.checked ? 'block' : 'none';
+        
+        if (this.checked) {
+            // Essayer d'obtenir la position de l'utilisateur
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    latitudeInput.value = position.coords.latitude;
+                    longitudeInput.value = position.coords.longitude;
+                }, function(error) {
+                    console.error('Erreur de géolocalisation:', error);
+                    alert('Impossible de déterminer votre position. Veuillez entrer vos coordonnées manuellement.');
+                });
+            } else {
+                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+            }
+        } else {
+            latitudeInput.value = '';
+            longitudeInput.value = '';
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Résultats du Pré-Diagnostic | DiagMedic{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Pathologies Probables</h3>
+            </div>
+            <div class="card-body">
+                {% if diseases %}
+                    {% for disease, score, symptoms in diseases %}
+                    <div class="mb-4">
+                        <h4>{{ disease.name }} <span class="disease-score">(Score: {{ "%.2f"|format(score) }})</span></h4>
+                        <p>{{ disease.description }}</p>
+                        
+                        <div>
+                            <strong>Symptômes correspondants:</strong>
+                            <div class="mt-2">
+                                {% for symptom in symptoms %}
+                                <span class="symptom-tag">{{ symptom }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="first-aid-box mt-3">
+                            <h5>Premiers gestes à faire:</h5>
+                            <p>{{ disease.first_aid }}</p>
+                        </div>
+                    </div>
+                    {% if not loop.last %}<hr>{% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-warning">
+                        Aucune pathologie correspondante trouvée pour les symptômes indiqués.
+                    </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <div class="alert alert-warning">
+                        <strong>Important:</strong> Ce pré-diagnostic est basé uniquement sur les symptômes que vous avez indiqués. Il ne remplace en aucun cas une consultation médicale professionnelle. Veuillez consulter un médecin pour un diagnostic précis.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Centres de Santé Proches</h3>
+            </div>
+            <div class="card-body">
+                <div class="map-container mb-4">
+                    {{ health_map|safe }}
+                </div>
+
+                <h4 class="mt-4">Liste des centres:</h4>
+                {% for center in centers %}
+                <div class="center-item">
+                    <h5>{{ center.name }}</h5>
+                    <p>{{ center.address }}</p>
+                    <p>Téléphone: {{ center.phone }}</p>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ center.latitude }},{{ center.longitude }}" target="_blank" class="btn btn-sm btn-outline-primary">Itinéraire Google Maps</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="d-grid gap-2">
+            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Retour au formulaire</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
